@@ -43,7 +43,6 @@ export async function POST(request: Request) {
   const headerWidth = photo && profile?.photo_path ? width - margin * 2 - 90 : width - margin * 2
   line(name, 24, true)
   if (details?.address) paragraph(String(details.address), 9, headerWidth)
-  if (profile?.headline) paragraph(String(profile.headline), 11, headerWidth)
   if (photo && profile?.photo_path) {
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } })
     const { data: image } = await admin.storage.from('profile').download(profile.photo_path)

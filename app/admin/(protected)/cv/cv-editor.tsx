@@ -54,7 +54,6 @@ export default function CvEditor({ profile, details, items }: { profile: Profile
     <div className="cv-preview" aria-label="CV preview">
       <h1>{profile?.display_name || 'Amin'}</h1>
       {details.address && <p className="cv-address">{details.address}</p>}
-      <p>{profile?.headline}</p>
       {sections.filter(s => enabled.includes(s)).map(section => <section key={section}>
         {section !== 'contact' && <h2>{labels[section]}</h2>}
         {section === 'contact' && <p>{[details.phone, details.email, details.linkedin_url, details.portfolio_url].filter(Boolean).join('  |  ')}</p>}
