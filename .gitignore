@@ -1,0 +1,9 @@
+.obsidian
+portfolio_plan/
+node_modules/
+.next/
+.env
+.env.local
+*.tsbuildinfo
+supabase/
+setup.md
