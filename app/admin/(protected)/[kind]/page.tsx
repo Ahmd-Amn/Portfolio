@@ -30,10 +30,10 @@ export default async function List({ params }: { params: Promise<{ kind: string 
         <tbody>{items.map(item => {
           const title = String(item.data.title || item.data.role || item.data.name || item.data.qualification || '')
           return <tr key={item.id}>
-            <td><strong>{title}</strong><br /><small>{String(item.data.organization || item.data.institution || item.data.issuer || '')}</small></td>
-            <td><span className={`badge ${item.deleted_at ? '' : item.status}`}>{item.deleted_at ? 'Trash' : item.status}</span></td>
-            <td>{item.sort_order}</td>
-            <td><div className="actions">
+            <td data-label="Entry"><strong>{title}</strong><br /><small>{String(item.data.organization || item.data.institution || item.data.issuer || '')}</small></td>
+            <td data-label="Status"><span className={`badge ${item.deleted_at ? '' : item.status}`}>{item.deleted_at ? 'Trash' : item.status}</span></td>
+            <td data-label="Order">{item.sort_order}</td>
+            <td data-label="Actions"><div className="actions">
               {item.deleted_at ? <Action id={item.id} action="restore" label="Restore" /> : <>
                 <Link className="button secondary" href={`/admin/${kind}/${item.id}`}>Edit</Link>
                 <Action id={item.id} action="up" label={`Move ${title} up`} />
