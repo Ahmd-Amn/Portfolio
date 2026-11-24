@@ -21,6 +21,7 @@ export default function CvEditor({ profile, details, items }: { profile: Profile
 
   function move(index: number, direction: number) { const next = [...sections]; const target = index + direction; if (target < 0 || target >= next.length) return; [next[index], next[target]] = [next[target], next[index]]; setSections(next) }
   async function download() {
+    if (!window.confirm('Download this CV as a PDF?')) return
     setBusy(true); setError('')
     const response = await fetch('/api/cv', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sections: sections.filter(s => enabled.includes(s)), selected, summary, overrides, photo }) })
     if (!response.ok) { setError((await response.json()).error || 'Could not generate CV'); setBusy(false); return }

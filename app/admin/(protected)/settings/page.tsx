@@ -3,6 +3,7 @@ import { owner } from '@/lib/data'
 import LocationField from '../[kind]/[id]/location-field'
 import SubmitButton from '../submit-button'
 import UnsavedWarning from '../unsaved-warning'
+import AdminForm from '../admin-form'
 
 export default async function Settings() {
   const supabase = await owner()
@@ -11,7 +12,7 @@ export default async function Settings() {
   return <>
     <h1>Profile & contact</h1>
     <p className="experience-intro">Change your name and private CV address in <a href="/admin">Overview</a>.</p>
-    <form action={saveProfile} className="form experience-form">
+    <AdminForm action={saveProfile} className="form experience-form">
       <UnsavedWarning />
       <div className="experience-fields">
         <div className="experience-section">
@@ -32,6 +33,6 @@ export default async function Settings() {
         </div>
       </div>
       <div className="form-actions"><SubmitButton>Save profile</SubmitButton></div>
-    </form>
+    </AdminForm>
   </>
 }

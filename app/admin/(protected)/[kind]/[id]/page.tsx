@@ -5,6 +5,7 @@ import ExperienceFields from './experience-fields'
 import OtherFields from './other-fields'
 import SubmitButton from '../../submit-button'
 import UnsavedWarning from '../../unsaved-warning'
+import AdminForm from '../../admin-form'
 
 export default async function Edit({ params }: { params: Promise<{ kind: string; id: string }> }) {
   const { kind, id } = await params
@@ -16,7 +17,7 @@ export default async function Edit({ params }: { params: Promise<{ kind: string;
   return <>
     <h1>{item ? 'Edit' : 'Add'} {kind === 'projects' ? 'project' : kind === 'skills' ? 'skill' : 'entry'}</h1>
     <p className="experience-intro">Add clear details so this entry works well on your portfolio and CV.</p>
-    <form action={saveItem} className="form experience-form">
+    <AdminForm action={saveItem} className="form experience-form">
       <UnsavedWarning />
       <input type="hidden" name="kind" value={kind} />
       <input type="hidden" name="id" value={item?.id || ''} />
@@ -26,6 +27,6 @@ export default async function Edit({ params }: { params: Promise<{ kind: string;
         <div className="field"><label htmlFor="status">Status</label><select id="status" name="status" defaultValue={item?.status || 'draft'}><option value="draft">Draft</option><option value="published">Published</option></select></div>
       </div>
       <div className="form-actions"><SubmitButton>Save entry</SubmitButton><a href={`/admin/${kind}`}>Cancel</a></div>
-    </form>
+    </AdminForm>
   </>
 }

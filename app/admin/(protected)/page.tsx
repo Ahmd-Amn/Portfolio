@@ -4,6 +4,7 @@ import { kinds, owner } from '@/lib/data'
 import LocationField from './[kind]/[id]/location-field'
 import SubmitButton from './submit-button'
 import UnsavedWarning from './unsaved-warning'
+import AdminForm from './admin-form'
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ updated?: string }> }) {
   const supabase = await owner()
@@ -23,7 +24,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     {(await searchParams).updated && <p className="success" role="status">Personal details saved.</p>}
     <h2 className="overview-content-heading">Content</h2>
     <div className="dashboard-grid">{kinds.map(kind => <Link className="dashboard-card" href={`/admin/${kind}`} key={kind}><span>{kind[0].toUpperCase() + kind.slice(1)}</span><strong>{items?.filter(item => item.kind === kind && !item.deleted_at).length || 0}</strong><span>{items?.filter(item => item.kind === kind && item.status === 'published' && !item.deleted_at).length || 0} published</span></Link>)}</div>
-    <form action={saveOwnerDetails} className="form overview-form">
+    <AdminForm action={saveOwnerDetails} className="form overview-form">
       <UnsavedWarning />
       <div className="overview-heading"><h2>Your details</h2><p>Your name appears on the portfolio and CV. Your address appears only in CV previews and downloads.</p></div>
       <div className="overview-name-grid">
@@ -41,6 +42,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       <div className="overview-heading"><h2>CV references</h2><p>This text appears at the end of your CV when filled in.</p></div>
       <div className="field"><label htmlFor="reference_text">References</label><textarea id="reference_text" name="reference_text" maxLength={2000} placeholder="e.g. Available upon request, or add a name, role, and contact details." defaultValue={details?.reference_text || ''} /></div>
       <SubmitButton>Save details</SubmitButton>
-    </form>
+    </AdminForm>
   </>
 }

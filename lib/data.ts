@@ -2,6 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { normalizeSlug } from './slug'
+import { FieldError } from './form-error'
 
 export const kinds = ['experience', 'projects', 'skills', 'education', 'certifications'] as const
 export type Kind = (typeof kinds)[number]
@@ -45,17 +47,18 @@ export async function publicContent() {
 
 export const url = z.union([z.literal(''), z.url().refine(v => /^https?:\/\//.test(v), 'Use an http or https URL')])
 export function validate(kind: Kind, data: Record<string, string>) {
-  for (const field of fields[kind]) if (data[field.name]?.length > (field.long ? 5000 : 500)) throw new Error(`${field.label} is too long`)
-  for (const field of fields[kind]) if (field.required && !data[field.name]?.trim()) throw new Error(`${field.label} is required`)
-  for (const key of ['repository_url', 'live_url', 'credential_url']) if (data[key]) url.parse(data[key])
-  for (const file of [data.cover_path, ...(data.gallery_paths || '').split('\n')].filter(Boolean)) if (!/^[0-9a-f-]{36}\.webp$/.test(file)) throw new Error('Invalid project image')
-  if (kind === 'projects' && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug)) throw new Error('URL slug must use lowercase letters, numbers, and hyphens')
+  if (kind === 'projects') data.slug = normalizeSlug(data.slug)
+  for (const field of fields[kind]) if (data[field.name]?.length > (field.long ? 5000 : 500)) throw new FieldError(field.name, `${field.label} is too long`)
+  for (const field of fields[kind]) if (field.required && !data[field.name]?.trim()) throw new FieldError(field.name, `${field.label} is required`)
+  for (const key of ['repository_url', 'live_url', 'credential_url']) if (data[key] && !url.safeParse(data[key]).success) throw new FieldError(key, 'Enter a valid http or https URL')
+  for (const file of [data.cover_path, ...(data.gallery_paths || '').split('\n')].filter(Boolean)) if (!/^[0-9a-f-]{36}\.webp$/.test(file)) throw new FieldError(file === data.cover_path ? 'cover_path' : 'gallery_paths', 'Upload the project image again')
+  if (kind === 'projects' && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug)) throw new FieldError('slug', 'Use letters, numbers, spaces, and hyphens for the URL name')
   for (const key of ['start_date', 'end_date', 'issue_date']) if (data[key] && data[key] !== 'Current') {
     const value = data[key]
     const date = new Date(`${value.length === 7 ? `${value}-01` : value}T00:00:00Z`)
-    if (!/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, value.length) !== value) throw new Error(`${key.replace('_', ' ')} must be a valid date`)
+    if (!/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, value.length) !== value) throw new FieldError(key, `${key.replace('_', ' ')} must be a valid date`)
   }
-  if (['experience', 'education'].includes(kind) && data.start_date && data.end_date && data.end_date !== 'Current' && data.end_date < data.start_date) throw new Error('End date must be after start date')
-  if (data.is_featured && !['yes', 'no'].includes(data.is_featured.toLowerCase())) throw new Error('Featured must be yes or no')
+  if (['experience', 'education'].includes(kind) && data.start_date && data.end_date && data.end_date !== 'Current' && data.end_date < data.start_date) throw new FieldError('end_date', 'End date must be after start date')
+  if (data.is_featured && !['yes', 'no'].includes(data.is_featured.toLowerCase())) throw new FieldError('is_featured', 'Featured must be yes or no')
   return data
 }

@@ -26,6 +26,7 @@ export default function OtherFields({ kind, data }: { kind: Exclude<Kind, 'exper
       <div className="experience-grid">{detailFields.map(field => <div className={`field ${field.long ? 'wide' : ''}`} key={field.name}>
         <label htmlFor={field.name}>{field.label}{field.required && <span aria-hidden="true"> *</span>}</label>
         {field.long ? <textarea id={field.name} name={field.name} required={field.required} placeholder={kind === 'education' && field.name === 'description' ? 'e.g. Focused on software engineering and applied research.' : placeholders[field.name]} defaultValue={value(field.name)} /> : field.name === 'is_featured' ? <select id={field.name} name={field.name} defaultValue={value(field.name) || 'no'}><option value="no">No</option><option value="yes">Yes</option></select> : <input id={field.name} name={field.name} type={field.name.endsWith('_url') ? 'url' : 'text'} required={field.required} placeholder={placeholders[field.name]} defaultValue={value(field.name)} />}
+        {field.name === 'slug' && <span className="field-help">Spaces and capital letters are converted when you save.</span>}
       </div>)}</div>
     </div>
     {kind === 'education' && <div className="experience-section"><div className="experience-section-heading"><h2>Time period</h2><p>Choose dates for this qualification.</p></div><ExperienceDates initialStart={value('start_date')} initialEnd={value('end_date')} currentLabel="I currently study here" /></div>}
