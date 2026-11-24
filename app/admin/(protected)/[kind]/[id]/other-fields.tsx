@@ -16,17 +16,18 @@ const placeholders: Record<string, string> = {
   issuer: 'e.g. AWS', credential_url: 'https://example.com/credential'
 }
 
-export default function OtherFields({ kind, data }: { kind: Exclude<Kind, 'experience'>; data: Record<string, unknown> }) {
+export default function OtherFields({ kind, data, bulkSkills = false }: { kind: Exclude<Kind, 'experience'>; data: Record<string, unknown>; bulkSkills?: boolean }) {
   const value = (name: string) => String(data[name] || '')
   const detailFields = fields[kind].filter(field => !['start_date', 'end_date', 'issue_date', 'cover_path', 'gallery_paths'].includes(field.name))
 
   return <div className="experience-fields">
     <div className="experience-section">
-      <div className="experience-section-heading"><h2>{headings[kind].title}</h2><p>{headings[kind].help}</p></div>
-      <div className="experience-grid">{detailFields.map(field => <div className={`field ${field.long ? 'wide' : ''}`} key={field.name}>
-        <label htmlFor={field.name}>{field.label}{field.required && <span aria-hidden="true"> *</span>}</label>
-        {field.long ? <textarea id={field.name} name={field.name} required={field.required} placeholder={kind === 'education' && field.name === 'description' ? 'e.g. Focused on software engineering and applied research.' : placeholders[field.name]} defaultValue={value(field.name)} /> : field.name === 'is_featured' ? <select id={field.name} name={field.name} defaultValue={value(field.name) || 'no'}><option value="no">No</option><option value="yes">Yes</option></select> : <input id={field.name} name={field.name} type={field.name.endsWith('_url') ? 'url' : 'text'} required={field.required} placeholder={placeholders[field.name]} defaultValue={value(field.name)} />}
+      <div className="experience-section-heading"><h2>{headings[kind].title}</h2><p>{bulkSkills ? 'Enter one skill per line. Each gets the category and proficiency below.' : headings[kind].help}</p></div>
+      <div className="experience-grid">{detailFields.map(field => <div className={`field ${field.long || (bulkSkills && field.name === 'name') ? 'wide' : ''}`} key={field.name}>
+        <label htmlFor={field.name}>{bulkSkills && field.name === 'name' ? 'Skill names (one per line)' : field.label}{field.required && <span aria-hidden="true"> *</span>}</label>
+        {bulkSkills && field.name === 'name' ? <textarea id={field.name} name={field.name} required placeholder={'TypeScript\nReact\nCSS'} /> : field.long ? <textarea id={field.name} name={field.name} required={field.required} placeholder={kind === 'education' && field.name === 'description' ? 'e.g. Focused on software engineering and applied research.' : placeholders[field.name]} defaultValue={value(field.name)} /> : field.name === 'is_featured' ? <select id={field.name} name={field.name} defaultValue={value(field.name) || 'no'}><option value="no">No</option><option value="yes">Yes</option></select> : <input id={field.name} name={field.name} type={field.name.endsWith('_url') ? 'url' : 'text'} required={field.required} placeholder={placeholders[field.name]} defaultValue={value(field.name)} />}
         {field.name === 'slug' && <span className="field-help">Spaces and capital letters are converted when you save.</span>}
+        {bulkSkills && field.name === 'name' && <span className="field-help">All names in this batch use the category and proficiency below.</span>}
       </div>)}</div>
     </div>
     {kind === 'education' && <div className="experience-section"><div className="experience-section-heading"><h2>Time period</h2><p>Choose dates for this qualification.</p></div><ExperienceDates initialStart={value('start_date')} initialEnd={value('end_date')} currentLabel="I currently study here" /></div>}

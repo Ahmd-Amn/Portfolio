@@ -22,7 +22,7 @@ export default async function List({ params }: { params: Promise<{ kind: string 
   return <>
     <div className="admin-top">
       <h1>{kind[0].toUpperCase() + kind.slice(1)}</h1>
-      <Link className="button" href={`/admin/${kind}/new`}>Add {kind === 'projects' ? 'project' : kind === 'skills' ? 'skill' : 'entry'}</Link>
+      <Link className="button" href={`/admin/${kind}/new`}>Add {kind === 'projects' ? 'project' : kind === 'skills' ? 'skills' : 'entry'}</Link>
     </div>
     {!items?.length ? <p className="empty">No entries yet. Add the first one to get started.</p> :
       <table className="admin-table">

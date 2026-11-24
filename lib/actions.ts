@@ -4,20 +4,26 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { fields, kinds, owner, url, validate, type Kind } from './data'
 import { FieldError, type FormResult } from './form-error'
+import { skillNames } from './skill-names'
 
 export async function saveItem(_: FormResult, form: FormData): Promise<FormResult> {
   const supabase = await owner()
   const kind = String(form.get('kind')) as Kind
   if (!kinds.includes(kind)) throw new Error('Invalid content type')
   const id = String(form.get('id') || '')
+  const names = kind === 'skills' && !id ? skillNames(String(form.get('name') || '')) : []
+  if (kind === 'skills' && !id && !names.length) return { field: 'name', message: 'Enter at least one skill name' }
+  if (names.length > 50) return { field: 'name', message: 'Add up to 50 skills at a time' }
+  if (new Set(names.map(name => name.toLowerCase())).size !== names.length) return { field: 'name', message: 'Remove repeated skill names' }
   let data: Record<string, string>
-  try { data = validate(kind, Object.fromEntries(fields[kind].map(f => [f.name, String(form.get(f.name) || '').trim()]))) }
+  try { data = validate(kind, Object.fromEntries(fields[kind].map(f => [f.name, f.name === 'name' && names.length ? names[0] : String(form.get(f.name) || '').trim()]))); for (const name of names.slice(1)) validate(kind, { ...data, name }) }
   catch (error) { if (error instanceof FieldError) return { field: error.field, message: error.message }; throw error }
   const status = form.get('status') === 'published' ? 'published' : 'draft'
   const sort_order = Number(form.get('sort_order') || 0)
   if (!Number.isSafeInteger(sort_order)) return { field: 'sort_order', message: 'Enter a whole number for display order' }
+  if (names.length && sort_order + names.length - 1 > 2147483647) return { field: 'sort_order', message: 'Display order is too large for this batch' }
   const record = { kind, data, status, sort_order, published_at: status === 'published' ? new Date().toISOString() : null }
-  const query = id ? supabase.from('content_items').update(record).eq('id', id).eq('kind', kind).is('deleted_at', null) : supabase.from('content_items').insert(record)
+  const query = id ? supabase.from('content_items').update(record).eq('id', id).eq('kind', kind).is('deleted_at', null) : supabase.from('content_items').insert(names.length ? names.map((name, index) => ({ ...record, data: { ...data, name }, sort_order: sort_order + index })) : record)
   const { error } = await query
   if (error?.code === '23505' && kind === 'projects') return { field: 'slug', message: 'This project URL name is already in use' }
   if (error) { console.error('Could not save content item', error); return { message: 'Could not save this entry. Please try again.' } }

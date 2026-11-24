@@ -65,3 +65,15 @@
 
 .admin-shell{grid-template-columns:200px minmax(0,1fr)}.admin-nav{padding:24px 16px}.admin-nav strong{font-size:1.1rem;line-height:1.3;margin-bottom:20px}.admin-links{gap:2px}.admin-links a{padding:9px 10px;font-size:.9rem}
 @media(max-width:800px){.admin-shell{grid-template-columns:minmax(0,1fr)}.admin-nav{padding:10px 16px}.admin-nav strong{font-size:1rem;margin:0}.admin-links.is-open{padding-top:8px}.admin-links a{min-height:44px}.admin-menu-toggle{min-width:68px}}
+
+.admin-nav-brand{min-width:0;margin-bottom:22px}.admin-nav-brand strong{display:block;margin:0;color:#fff;font-size:1.15rem;font-weight:750;line-height:1.25;letter-spacing:-.02em}.admin-nav-brand span{display:block;margin-top:3px;color:#b9cbe0;font-size:.8rem;line-height:1.3}.admin-links a{color:#dce7f2;line-height:1.35}.admin-links a[aria-current=page]{background:#365574;color:#fff;font-weight:700}.admin-links form button.secondary{width:100%;margin-top:12px;border:1px solid #7289a4;background:transparent;color:#dce7f2;font-size:.9rem;font-weight:600;text-align:left}.admin-links form button.secondary:hover{background:#294363}
+@media(max-width:800px){.admin-nav-brand{margin:0}.admin-nav-brand strong{font-size:1.05rem}.admin-nav-brand span{font-size:.75rem}.admin-links form button.secondary{margin-top:2px;min-height:44px}}
+
+.project-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto}.project-footer .text-link{margin-top:0}.featured-tag{flex:none;padding:7px 10px;border-radius:4px;background:#fce4db;color:#873017;font-size:.78rem;font-weight:700;line-height:1.2}
+
+.timeline-row{grid-template-columns:230px minmax(0,1fr)}.timeline-row .date{white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:800px){.timeline-row{grid-template-columns:minmax(0,1fr)}}
+
+.site-header{position:sticky;top:0;z-index:20;width:100%;padding-inline:max(24px,calc((100% - 1160px)/2));background:#f7f9fc}#work,#about,#experience,#contact{scroll-margin-top:96px}
+@media(max-width:800px){.site-header{padding-inline:20px}#work,#about,#experience,#contact{scroll-margin-top:150px}}
+@media(max-width:560px){.site-header{width:100%;padding:16px}#work,#about,#experience,#contact{scroll-margin-top:132px}}
