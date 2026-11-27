@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { sameOrigin } from '@/lib/same-origin'
-import { createClient } from '@supabase/supabase-js'
 import sharp from 'sharp'
 import { db } from '@/lib/data'
 
@@ -18,7 +17,6 @@ export async function POST(request: Request) {
   if (!meta?.width || !meta.height || meta.width > 10000 || meta.height > 10000 || !['jpeg', 'png', 'webp'].includes(meta.format || '')) return NextResponse.json({ error: 'Invalid image' }, { status: 400 })
   const optimized = await image.resize({ width: 1600, height: 1200, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
   const path = `${crypto.randomUUID()}.webp`
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } })
-  const { error } = await admin.storage.from('project-media').upload(path, optimized, { contentType: 'image/webp', upsert: false })
+  const { error } = await supabase.storage.from('project-media').upload(path, optimized, { contentType: 'image/webp', upsert: false })
   return error ? NextResponse.json({ error: error.message }, { status: 500 }) : NextResponse.json({ path })
 }

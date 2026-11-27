@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { PDFDocument, rgb } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { readFile } from 'node:fs/promises'
@@ -12,7 +11,7 @@ import { sameOrigin } from '@/lib/same-origin'
 export const runtime = 'nodejs'
 const sections = ['contact', 'summary', ...kinds] as const
 const requestSchema = z.object({ sections: z.array(z.enum(sections)).max(7), selected: z.array(z.uuid()).max(100), summary: z.string().max(2000), overrides: z.record(z.string(), z.string().max(3000)), photo: z.boolean() })
-const label: Record<string, string> = { contact: 'Contact', summary: 'Professional summary', experience: 'Experience', projects: 'Projects', skills: 'Skills', education: 'Education', certifications: 'Certifications' }
+const label: Record<string, string> = { contact: 'Contact', summary: 'Professional Summary', experience: 'Experience', projects: 'Projects', skills: 'Skills', education: 'Education', certifications: 'Certifications' }
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -42,10 +41,9 @@ export async function POST(request: Request) {
   const name = String(profile?.display_name || 'Amin')
   const headerWidth = photo && profile?.photo_path ? width - margin * 2 - 90 : width - margin * 2
   line(name, 24, true)
-  if (details?.address) paragraph(String(details.address), 9, headerWidth)
+  if (details?.address) paragraph(String(details.address), 10, headerWidth)
   if (photo && profile?.photo_path) {
-    const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } })
-    const { data: image } = await admin.storage.from('profile').download(profile.photo_path)
+    const { data: image } = await supabase.storage.from('profile').download(profile.photo_path)
     if (image) { const embedded = await pdf.embedPng(await (await import('sharp')).default(Buffer.from(await image.arrayBuffer())).png().toBuffer()); page.drawImage(embedded, { x: width - margin - 72, y: height - margin - 72, width: 72, height: 72 }); y = Math.min(y, height - margin - 86) }
   }
   for (const section of order) {
@@ -58,15 +56,15 @@ export async function POST(request: Request) {
       const d = item.data
       const title = String(d.title || d.role || d.name || d.qualification || '')
       const date = cvDateLabel(d)
-      if (date) {
-        const dateWidth = regular.widthOfTextAtSize(date, 9)
-        page.drawText(date, { x: width - margin - dateWidth, y, size: 9, font: regular, color })
-        const titleWidth = width - margin * 2 - dateWidth - 16
-        if (bold.widthOfTextAtSize(title, 11) <= titleWidth) line(title, 11, true)
-        else paragraph(title, 11, titleWidth)
-      } else line(title, 11, true)
+      const headingY = y
+      const dateWidth = date ? regular.widthOfTextAtSize(date, 10) : 0
+      const titleWidth = width - margin * 2 - (date ? dateWidth + 16 : 0)
+      if (bold.widthOfTextAtSize(title, 10) <= titleWidth) line(title, 10, true)
+      else paragraph(title, 10, titleWidth)
+      if (date) page.drawText(date, { x: width - margin - dateWidth, y: headingY, size: 10, font: regular, color })
       const sub = d.organization || d.institution || d.issuer
-      if (sub) paragraph(String(sub), 9)
+      if (sub) paragraph(String(sub), 10)
+      if (section === 'projects' && d.technologies) paragraph(String(d.technologies))
       const copy = overrides[item.id] || String(d.summary || d.description || '')
       if (copy) paragraph(copy)
       if (section === 'experience' && d.achievements) paragraph(String(d.achievements).split('\n').filter(Boolean).map(a => `• ${a}`).join('\n'))

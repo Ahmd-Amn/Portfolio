@@ -37,16 +37,21 @@ export async function owner() {
 export async function publicContent() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return { profile: null, name: 'Amin', items: [] as Item[] }
   const supabase = await db()
-  const [{ data: profile }, { data: identity }, { data: items }] = await Promise.all([
+  const [profileResult, identityResult, itemsResult] = await Promise.all([
     supabase.from('site_profile').select('*').eq('status', 'published').is('deleted_at', null).maybeSingle(),
     supabase.from('site_identity').select('display_name').maybeSingle(),
     supabase.from('content_items').select('*').eq('status', 'published').is('deleted_at', null).order('sort_order').order('created_at')
   ])
+  if (profileResult.error || identityResult.error || itemsResult.error) throw new Error('Could not load published portfolio content')
+  const { data: profile } = profileResult
+  const { data: identity } = identityResult
+  const { data: items } = itemsResult
   return { profile: profile as Profile | null, name: identity?.display_name || profile?.display_name || 'Amin', items: (items || []) as Item[] }
 }
 
 export const url = z.union([z.literal(''), z.url().refine(v => /^https?:\/\//.test(v), 'Use an http or https URL')])
 export function validate(kind: Kind, data: Record<string, string>) {
+  if (data.gallery_paths) data.gallery_paths = data.gallery_paths.replace(/\r\n/g, '\n')
   if (kind === 'projects') data.slug = normalizeSlug(data.slug)
   for (const field of fields[kind]) if (data[field.name]?.length > (field.long ? 5000 : 500)) throw new FieldError(field.name, `${field.label} is too long`)
   for (const field of fields[kind]) if (field.required && !data[field.name]?.trim()) throw new FieldError(field.name, `${field.label} is required`)
