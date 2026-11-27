@@ -6,12 +6,13 @@ import path from 'node:path'
 import { z } from 'zod'
 import { db, kinds, type Item } from '@/lib/data'
 import { cvDateLabel } from '@/lib/dates'
+import { cvSkillGroups } from '@/lib/cv-skills'
 import { sameOrigin } from '@/lib/same-origin'
 
 export const runtime = 'nodejs'
 const sections = ['contact', 'summary', ...kinds] as const
 const requestSchema = z.object({ sections: z.array(z.enum(sections)).max(7), selected: z.array(z.uuid()).max(100), summary: z.string().max(2000), overrides: z.record(z.string(), z.string().max(3000)), photo: z.boolean() })
-const label: Record<string, string> = { contact: 'Contact', summary: 'Professional Summary', experience: 'Experience', projects: 'Projects', skills: 'Skills', education: 'Education', certifications: 'Certifications' }
+const label: Record<string, string> = { contact: 'Contact', summary: 'Professional Summary', experience: 'Experience', projects: 'Projects', skills: 'Technical skills', education: 'Education', certifications: 'Certifications' }
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
     nextPage(60); y -= 8; line(label[section], 13, true)
     page.drawLine({ start: { x: margin, y: y + 4 }, end: { x: width - margin, y: y + 4 }, thickness: .6, color: rgb(.65, .7, .76) }); y -= 8
     if (section === 'summary') { paragraph(summary); continue }
+    if (section === 'skills') { for (const group of cvSkillGroups(selectedItems, overrides)) paragraph(`• ${group}`); continue }
     for (const item of selectedItems.filter(i => i.kind === section)) {
       nextPage(65)
       const d = item.data

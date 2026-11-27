@@ -2,8 +2,9 @@
 import { useState } from 'react'
 import type { Item, Profile } from '@/lib/data'
 import { cvDateLabel } from '@/lib/dates'
+import { cvSkillGroups } from '@/lib/cv-skills'
 
-const labels: Record<string, string> = { contact: 'Contact', summary: 'Professional Summary', experience: 'Experience', projects: 'Projects', skills: 'Skills', education: 'Education', certifications: 'Certifications' }
+const labels: Record<string, string> = { contact: 'Contact', summary: 'Professional Summary', experience: 'Experience', projects: 'Projects', skills: 'Technical skills', education: 'Education', certifications: 'Certifications' }
 const title = (item: Item) => String(item.data.title || item.data.role || item.data.name || item.data.qualification || '')
 const body = (item: Item) => String(item.data.summary || item.data.description || '')
 
@@ -65,7 +66,7 @@ export default function CvEditor({ profile, details, items }: { profile: Profile
         {section !== 'contact' && <h2>{labels[section]}</h2>}
         {section === 'contact' && <p>{[details.phone, details.email, details.linkedin_url, details.portfolio_url].filter(Boolean).join('  |  ')}</p>}
         {section === 'summary' && <p>{summary}</p>}
-        {items.filter(i => i.kind === section && selected.includes(i.id)).map(item => <div className="cv-entry" key={item.id}><div className="cv-entry-heading"><strong>{title(item)}</strong>{cvDateLabel(item.data) && <small className="cv-date">{cvDateLabel(item.data)}</small>}</div><span>{String(item.data.organization || item.data.institution || item.data.issuer || '')}</span>{section === 'projects' && Boolean(item.data.technologies) && <p>{String(item.data.technologies)}</p>}<p>{overrides[item.id] || body(item)}</p></div>)}
+        {section === 'skills' ? <ul>{cvSkillGroups(items.filter(i => selected.includes(i.id)), overrides).map(group => <li key={group}>{group}</li>)}</ul> : items.filter(i => i.kind === section && selected.includes(i.id)).map(item => <div className="cv-entry" key={item.id}><div className="cv-entry-heading"><strong>{title(item)}</strong>{cvDateLabel(item.data) && <small className="cv-date">{cvDateLabel(item.data)}</small>}</div><span>{String(item.data.organization || item.data.institution || item.data.issuer || '')}</span>{section === 'projects' && Boolean(item.data.technologies) && <p>{String(item.data.technologies)}</p>}<p>{overrides[item.id] || body(item)}</p></div>)}
       </section>)}
       {details.reference_text && <section><h2>References</h2><p>{details.reference_text}</p></section>}
     </div>
