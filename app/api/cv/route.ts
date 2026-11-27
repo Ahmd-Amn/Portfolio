@@ -66,7 +66,6 @@ export async function POST(request: Request) {
       if (date) page.drawText(date, { x: width - margin - dateWidth, y: headingY, size: 10, font: regular, color })
       const sub = d.organization || d.institution || d.issuer
       if (sub) paragraph(String(sub), 10)
-      if (section === 'projects' && d.technologies) paragraph(String(d.technologies))
       const copy = overrides[item.id] || String(d.summary || d.description || '')
       if (copy) paragraph(copy)
       if (section === 'experience' && d.achievements) paragraph(String(d.achievements).split('\n').filter(Boolean).map(a => `• ${a}`).join('\n'))
